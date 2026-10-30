@@ -23,6 +23,7 @@ import AIAssistant from './AIAssistant'
 
 interface Props {
   node?: q.TreeNode<any>
+  lastUpdate?: number
   classes: any
   compareMessage?: q.Message
   connectionId?: string
@@ -36,7 +37,7 @@ function DetailsTab(props: Props) {
 
   const getDecodedValue = useCallback(
     () => node?.message && decodeMessage(node.message)?.message?.toUnicodeString(),
-    [node, decodeMessage]
+    [node, decodeMessage, props.lastUpdate]
   )
 
   const getData = () => {

@@ -24,6 +24,7 @@ export default {
       'node_modules',
     ],
     alias: {
+      ...baseConfig.resolve.alias,
       electron: path.resolve(__dirname, './src/mocks/electron.ts'),
     },
     fallback: {

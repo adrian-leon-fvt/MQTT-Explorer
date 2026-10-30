@@ -28,6 +28,13 @@ rendering history. From `app`, run
 `yarn mocha --require tsx --require source-map-support/register src/decoders/SparkplugBDecoder.spec.ts`.
 The pinned `sparkplug-payload` package supplies the Protobuf schema; its higher-level
 decoder loses omitted datatypes and mishandles UInt32, so use the bundled schema.
+Run `python scripts/sparkplug-e2e.py | yarn --silent test:sparkplug-e2e` after
+`yarn build:server` for independent Python payloads through MQTT and the browser.
+See README for prerequisites. Use browser-safe base64 decoding, not Node Buffer.
+Keep the webpack Protobuf alias: the schema and decoder must share the runtime
+configured with Long, or browser UInt64 values silently lose precision.
+Sidebar must pass `lastUpdate` to DetailsTab: mutable node identity alone does
+not trigger its connected component to refresh.
 
 **Unit tests:**
 - `yarn test` - All unit tests (app + backend)

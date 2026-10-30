@@ -52,6 +52,26 @@ Run the focused checks from `app`:
 yarn mocha --require tsx --require source-map-support/register src/decoders/SparkplugBDecoder.spec.ts
 ```
 
+For independent Python-to-browser E2E checks, install
+[`pysparkplug`](https://pypi.org/project/pysparkplug/) into your Python environment.
+Mosquitto must be on PATH, and Playwright needs Chromium (or an installed Edge/Chrome).
+From the repository root:
+
+```bash
+python -m pip install -r scripts/requirements-sparkplug.txt
+yarn build:server
+yarn playwright install chromium
+python scripts/sparkplug-e2e.py | yarn --silent test:sparkplug-e2e
+```
+
+Set `MOSQUITTO` to a broker executable path if needed. Set `PLAYWRIGHT_CHANNEL`
+to `msedge` or `chrome` to use an installed browser instead of downloading Chromium.
+The runner starts an isolated broker and app server, connects through the browser,
+and cleans up its own processes/settings. Python independently encodes payloads;
+the runner publishes those bytes unchanged over MQTT and checks rendered values:
+missing birth warnings, alias zero, omitted datatypes, exact maximum UInt64,
+alias reuse after rebirth, device death and post-death invalidation.
+
 ## Quick Start with GitHub Codespaces
 
 The fastest way to start developing is with GitHub Codespaces:

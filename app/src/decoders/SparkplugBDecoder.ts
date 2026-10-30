@@ -1,10 +1,16 @@
 import { org } from 'sparkplug-payload/lib/sparkplugPayloadProto'
+import protobuf from 'protobufjs/minimal'
+import Long from 'long'
+import { Base64 } from 'js-base64'
 import { Base64Message } from '../../../backend/src/Model/Base64Message'
 import { Decoder } from '../../../backend/src/Model/Decoder'
 import { MqttMessage } from '../../../events'
 import { DecoderEnvelope } from './DecoderEnvelope'
 import { MessageDecoder } from './MessageDecoder'
 
+// Configure the schema's runtime explicitly: browser bundles cannot discover Long dynamically.
+protobuf.util.Long = Long
+protobuf.configure()
 const { Payload, DataType } = org.eclipse.tahu.protobuf
 type Metric = org.eclipse.tahu.protobuf.Payload.IMetric
 type Definitions = { names: Map<string, Metric | undefined>; aliases: Map<string, Metric | undefined> }
@@ -153,7 +159,7 @@ function decode(
   nodes = new Map<string, NodeBirth>()
 ): DecoderEnvelope {
   try {
-    const payload = Payload.decode(input.toBuffer())
+    const payload = Payload.decode(Base64.toUint8Array(input.base64Message))
     const warnings = new Set<string>()
     if (payload.uuid === 'SPBV1.0_COMPRESSED') {
       throw new Error('Compressed Sparkplug payload is not expanded; raw bytes preserved.')

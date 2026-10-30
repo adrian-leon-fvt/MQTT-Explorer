@@ -2,7 +2,7 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import webpack from 'webpack'
 import { fileURLToPath } from 'url'
-import { dirname } from 'path'
+import { dirname, resolve } from 'path'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -57,6 +57,10 @@ export default {
   devtool: isDevelopment ? 'eval-cheap-module-source-map' : 'source-map',
   resolve: {
     extensions: ['.ts', '.mjs', '.m.js', '.tsx', '.js', '.json', '.node'],
+    alias: {
+      // The generated Sparkplug schema and decoder must share the configured Long runtime.
+      'protobufjs/minimal$': resolve(__dirname, '..', 'node_modules', 'protobufjs', 'minimal.js'),
+    },
   },
   module: {
     rules: [
