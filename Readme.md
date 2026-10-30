@@ -18,6 +18,40 @@ Downloads can be found at the link above.
 This page is dedicated to its development.
 Pull-Requests and error reports are welcome.
 
+## Sparkplug B fork
+
+This public fork adds birth-aware Sparkplug B inspection to MQTT Explorer.
+Original authorship, attribution, donation links and license remain unchanged.
+Upstream downloads do not include these changes; build this fork from source.
+
+Connect normally and subscribe to `spBv1.0/#` **before** the publisher sends
+NBIRTH/DBIRTH. Select an NDATA/DDATA topic to see named, typed metric values
+instead of unresolved numeric aliases. Commands use the same birth context.
+Aliases are scoped by connection, group, node and device. A node rebirth clears
+its device definitions; death messages and broker disconnects invalidate context.
+Stale NDEATH messages with a different `bdSeq` do not invalidate a newer birth.
+
+Decoded JSON includes `type`, `value` and a `sparkplug` object containing
+message identity, lifecycle status at receipt and warnings. Original wire fields,
+timestamps, metadata and properties remain visible. All 64-bit integers are
+decimal strings, including aliases and timestamps, to avoid precision loss.
+Datasets and inline template metrics are decoded; binary/file values use base64.
+Payload bytes remain unchanged, and history keeps the context captured at receipt,
+even while the tree is paused or after alias reuse.
+
+Missing births, unknown aliases, duplicate mappings and unsupported values produce
+visible warnings; names are never guessed. If connected after birth, wait for the
+publisher's next birth or request rebirth using your existing tooling. This fork
+does not automatically publish rebirth commands, expand shared template definitions,
+unpack typed-array/compressed payloads, or implement a full Sparkplug host.
+Unsupported wire fields remain available for inspection.
+
+Run the focused checks from `app`:
+
+```bash
+yarn mocha --require tsx --require source-map-support/register src/decoders/SparkplugBDecoder.spec.ts
+```
+
 ## Quick Start with GitHub Codespaces
 
 The fastest way to start developing is with GitHub Codespaces:

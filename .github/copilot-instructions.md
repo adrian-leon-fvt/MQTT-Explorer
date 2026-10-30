@@ -20,6 +20,15 @@
 
 ## Test Commands
 
+**Sparkplug B fork:** `app/src/decoders/SparkplugBDecoder.ts` captures per-connection
+birth context through `Tree.onMessageReceived`, before UI buffering. Preserve
+`Base64Message` identity in `TreeNodeFactory`: decoder history snapshots use a
+WeakMap keyed by that instance. Reset context on broker disconnect, not when
+rendering history. From `app`, run
+`yarn mocha --require tsx --require source-map-support/register src/decoders/SparkplugBDecoder.spec.ts`.
+The pinned `sparkplug-payload` package supplies the Protobuf schema; its higher-level
+decoder loses omitted datatypes and mishandles UInt32, so use the bundled schema.
+
 **Unit tests:**
 - `yarn test` - All unit tests (app + backend)
 - `yarn test:app` - Frontend tests only
@@ -258,4 +267,3 @@ export MQTT_AUTO_CONNECT_HOST=127.0.0.1
 export MQTT_AUTO_CONNECT_PORT=1883  # optional
 export MQTT_AUTO_CONNECT_PROTOCOL=mqtt  # optional
 ```
-

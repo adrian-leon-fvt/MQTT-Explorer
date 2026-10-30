@@ -14,6 +14,8 @@ export class Tree<ViewModel extends Destroyable> extends TreeNode<ViewModel> {
   private unmergedMessages: ChangeBuffer = new ChangeBuffer()
   public didUpdate = new EventDispatcher<void>()
 
+  public onMessageReceived = new EventDispatcher<MqttMessage>()
+
   public updateInterval: any
   private paused: boolean = false
   private applyChangesHasCompleted = true
@@ -23,6 +25,7 @@ export class Tree<ViewModel extends Destroyable> extends TreeNode<ViewModel> {
   }
 
   private handleNewData = (msg: MqttMessage) => {
+    this.onMessageReceived.dispatch(msg)
     this.unmergedMessages.push(msg)
   }
 
@@ -31,7 +34,7 @@ export class Tree<ViewModel extends Destroyable> extends TreeNode<ViewModel> {
       if (!this.paused && this.applyChangesHasCompleted) {
         this.applyChangesHasCompleted = false
         if ((window as any).requestIdleCallback) {
-           (window as any).requestIdleCallback(() => this.applyUnmergedChanges(), { timeout: 500 })
+          window.requestIdleCallback(() => this.applyUnmergedChanges(), { timeout: 500 })
         } else {
           this.applyUnmergedChanges()
         }
@@ -45,6 +48,7 @@ export class Tree<ViewModel extends Destroyable> extends TreeNode<ViewModel> {
     this.updateSource && this.updateSource.unsubscribe(this.subscriptionEvent, this.handleNewData)
     this.updateSource = undefined
     this.didUpdate.removeAllListeners()
+    this.onMessageReceived.removeAllListeners()
   }
 
   public updateWithConnection(

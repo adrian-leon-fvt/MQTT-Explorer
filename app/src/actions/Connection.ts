@@ -10,9 +10,11 @@ import { resetStore as resetTreeStore, showTree } from './Tree'
 import { showError } from './Global'
 import { TopicViewModel } from '../model/TopicViewModel'
 import { addMqttConnectionEvent, makeConnectionStateEvent, removeConnection, rendererEvents } from '../eventBus'
+import { SparkplugSession } from '../decoders/SparkplugBDecoder'
 
 export const connect =
   (options: MqttOptions, connectionId: string) => (dispatch: Dispatch<any>, getState: () => AppState) => {
+    const sparkplug = new SparkplugSession()
     dispatch(connecting(connectionId))
     rendererEvents.emit(addMqttConnectionEvent, { options, id: connectionId })
     const event = makeConnectionStateEvent(connectionId)
@@ -23,13 +25,17 @@ export const connect =
         const didReconnect = Boolean(getState().connection.tree)
         if (!didReconnect) {
           const tree = new q.Tree<TopicViewModel>()
+          tree.onMessageReceived.subscribe(message => sparkplug.observe(message))
           tree.updateWithConnection(rendererEvents, connectionId)
           dispatch(showTree(tree))
           dispatch(connected(tree, host!))
         }
-      } else if (dataSourceState.error) {
-        dispatch(showError(dataSourceState.error))
-        dispatch(disconnect())
+      } else {
+        sparkplug.reset()
+        if (dataSourceState.error) {
+          dispatch(showError(dataSourceState.error))
+          dispatch(disconnect())
+        }
       }
       dispatch(updateHealth(dataSourceState))
     })
