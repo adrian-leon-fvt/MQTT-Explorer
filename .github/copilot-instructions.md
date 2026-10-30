@@ -18,6 +18,12 @@
 - `yarn lint:prettier` - Check Prettier formatting only
 - `yarn lint:eslint` - Check ESLint only
 
+Review autofix output before committing: cross-package import fixes can produce
+unresolvable package paths. Preserve working relative imports. Keep fixes scoped;
+compare existing lint failures against upstream rather than reformatting unrelated
+files. On Windows, invoke `node_modules\.bin\*.cmd` directly when passing a file
+array; Yarn Classic can combine the array into a single invalid filename.
+
 ## Test Commands
 
 **Sparkplug B fork:** `app/src/decoders/SparkplugBDecoder.ts` captures per-connection
@@ -31,6 +37,8 @@ decoder loses omitted datatypes and mishandles UInt32, so use the bundled schema
 Run `python scripts/sparkplug-e2e.py | yarn --silent test:sparkplug-e2e` after
 `yarn build:server` for independent Python payloads through MQTT and the browser.
 See README for prerequisites. Use browser-safe base64 decoding, not Node Buffer.
+Desktop and browser builds share `app/build`: always run `yarn build:server`
+before browser E2E after a desktop build, or the page fails with `require is not defined`.
 Keep the webpack Protobuf alias: the schema and decoder must share the runtime
 configured with Long, or browser UInt64 values silently lose precision.
 Sidebar must pass `lastUpdate` to DetailsTab: mutable node identity alone does
@@ -40,6 +48,11 @@ not trigger its connected component to refresh.
 - `yarn test` - All unit tests (app + backend)
 - `yarn test:app` - Frontend tests only
 - `yarn test:backend` - Backend tests only
+
+On Windows, the backend script's POSIX `NODE_PATH=...` syntax is unsupported.
+From the root, run `yarn mocha --require tsx --require source-map-support/register "backend/src/Model/spec/**/*.spec.ts"`.
+Run frontend tests from `app` to use its local Mocha instance. For the existing
+LoginDialog timing sensitivity, use `yarn test --timeout 10000`.
 
 **LLM integration tests:**
 - Requires API key (OpenAI or Gemini)
